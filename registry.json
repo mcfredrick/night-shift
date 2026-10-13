@@ -1,0 +1,17 @@
+{
+  "sites": [
+    {
+      "slug": "analytical-web",
+      "title": "The Analytical Web",
+      "url": "https://analytical-web.dayjob.dev/",
+      "repo": "https://github.com/mcfredrick/analytical-web",
+      "summary": "Web pages computed on Babbage's Analytical Engine, woven on a Jacquard loom and reckoned in pebbles on a Roman counting board, at each machine's own speed.",
+      "tags": [
+        "computing history",
+        "emulator"
+      ],
+      "added": "2026-10-12",
+      "thumb": "thumbs/analytical-web.jpg"
+    }
+  ]
+}

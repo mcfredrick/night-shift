@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Night Shift</title>
+<meta name="description" content="Educational toys and parodies built after the day job, by DayJob Development.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<!-- PLAUSIBLE_SNIPPET -->
+<style>
+:root {
+  --night: #11131c;
+  --night-raised: #1a1d29;
+  --rule: #2c3042;
+  --ink: #ece6d8;
+  --dim: #9a9686;
+  --lamp: #f0b45a;          /* the desk lamp still on after hours */
+  --serif: "Fraunces", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--night); }
+body {
+  margin: 0; min-height: 100vh; color: var(--ink); font: 16px/1.55 var(--serif);
+  background: radial-gradient(ellipse 70% 45% at 85% 0%, rgba(240,180,90,.13), transparent 70%), var(--night);
+  padding: max(28px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+
+header { display: grid; gap: 14px; padding-top: 24px; }
+.clock { font: 500 13px/1 var(--mono); letter-spacing: .12em; color: var(--lamp); text-transform: uppercase; }
+h1 { font: 600 clamp(2.6rem, 8vw, 5rem)/.95 var(--serif); margin: 0; letter-spacing: -.02em; }
+.lede { font-size: 1.15rem; color: var(--dim); max-width: 36em; margin: 0; }
+.lede a { color: var(--ink); }
+
+.sites { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 22px; margin: 0; padding: 0; list-style: none; }
+.site {
+  background: var(--night-raised); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden;
+  display: grid; grid-template-rows: auto 1fr; transition: border-color .15s, transform .15s;
+}
+.site:hover { border-color: var(--lamp); transform: translateY(-2px); }
+.thumb { aspect-ratio: 16 / 10; background: var(--rule); display: block; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.body { padding: 16px 18px 18px; display: grid; gap: 10px; align-content: start; }
+.site h2 { font: 600 1.35rem/1.15 var(--serif); margin: 0; }
+.site h2 a { color: inherit; text-decoration: none; }
+.site h2 a::after { content: ""; position: absolute; inset: 0; }   /* the whole card opens the site */
+.site { position: relative; }
+.site p { margin: 0; color: var(--dim); }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font: 12px/1.4 var(--mono); color: var(--dim); }
+.meta .tag { color: var(--lamp); }
+.meta a { position: relative; z-index: 1; color: var(--ink); }
+
+.empty, .error { color: var(--dim); font-style: italic; }
+footer { border-top: 1px solid var(--rule); padding-top: 16px; text-align: center; font-style: italic; color: var(--dim); }
+footer a { color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) { .site { transition: none; } .site:hover { transform: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="clock">After hours</p>
+    <h1>Night Shift</h1>
+    <p class="lede">Things built after the day job. Small sites that teach something real while having some fun with it, from web pages computed on Victorian machinery to whatever comes next.</p>
+  </header>
+
+  <main>
+    <ul class="sites" id="sites"></ul>
+    <noscript><p class="empty">The list is read from <a href="registry.json" style="color:inherit">registry.json</a>, which needs JavaScript to lay out.</p></noscript>
+  </main>
+
+  <footer>Built by <a href="https://dayjob.dev">DayJob Development</a></footer>
+</div>
+
+<script type="module">
+const list = document.getElementById("sites");
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const date = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+try {
+  const res = await fetch("registry.json");
+  if (!res.ok) throw new Error(`registry.json could not be fetched (${res.status}).`);
+  const { sites } = await res.json();
+  list.innerHTML = sites.length ? sites.map((s) => `
+    <li class="site">
+      <span class="thumb">${s.thumb ? `<img src="${esc(s.thumb)}" alt="" loading="lazy">` : ""}</span>
+      <div class="body">
+        <h2><a href="${esc(s.url)}">${esc(s.title)}</a></h2>
+        <p>${esc(s.summary)}</p>
+        <div class="meta">
+          <span>${date(s.added)}</span>
+          ${s.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}
+          <a href="${esc(s.repo)}">source</a>
+        </div>
+      </div>
+    </li>`).join("") : `<li class="empty">Nothing on the bench yet.</li>`;
+} catch (err) {
+  list.innerHTML = `<li class="error">${esc(err.message)}</li>`;
+}
+</script>
+</body>
+</html>
